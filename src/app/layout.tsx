@@ -1,0 +1,3 @@
+import type {Metadata} from 'next';import './globals.css';import {Header,BottomNav,Footer} from '@/components/shell';import {AppStateProvider} from '@/components/app-state';
+export const metadata:Metadata={title:{default:'ReelAI — Stories in motion',template:'%s | ReelAI'},description:'Discover cinematic AI-generated short dramas and vertical episodic reels.'};
+export default function RootLayout({children}:{children:React.ReactNode}){return <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning><body suppressHydrationWarning><AppStateProvider><Header/>{children}<Footer/><BottomNav/></AppStateProvider></body></html>}

@@ -1,0 +1,4 @@
+import Link from 'next/link';
+import { AutoplayToggle } from '@/components/library-actions';
+
+export default function Profile() { return <main className="page"><div className="profile-head"><div className="avatar profile-avatar">RA</div><div><div className="eyebrow">LOCAL PROTOTYPE</div><h1>ReelAI Viewer</h1><p className="muted">Preferences are saved on this device.</p></div></div><div className="tabs"><b>Overview</b><Link href="/my-list" className="muted">My list</Link><Link href="/history" className="muted">History</Link></div><section className="settings-panel"><h2>Playback</h2><div className="setting-row"><span>▶</span><div><b>Autoplay next episode</b><p className="muted">Continue after a three-second countdown.</p></div><AutoplayToggle/></div><div className="setting-row"><span>CC</span><div><b>Subtitles</b><p className="muted">Controlled by the active video source.</p></div><button className="pill" disabled>Source default</button></div></section></main>; }
