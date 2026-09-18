@@ -2,8 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { StreamSource } from '@/types/stream';
+import { YouTubeEmbedPlayer } from './youtube-embed-player';
 
-type VideoPlayerProps = {
+export type VideoPlayerProps = {
   source: StreamSource;
   poster?: string;
   title: string;
@@ -27,7 +28,7 @@ const formatTime = (value: number) => {
   return `${minutes}:${String(Math.floor(value % 60)).padStart(2, '0')}`;
 };
 
-export function VideoPlayer({ source, poster, title, active = true, autoPlay = false, muted = false, compact = false, resumePosition = 0, autoplayNext = false, nextEpisodeLabel = 'Next episode', onProgress, onPause, onEnded, onNextEpisode, onPlaybackError }: VideoPlayerProps) {
+function StandardVideoPlayer({ source, poster, title, active = true, autoPlay = false, muted = false, compact = false, resumePosition = 0, autoplayNext = false, nextEpisodeLabel = 'Next episode', onProgress, onPause, onEnded, onNextEpisode, onPlaybackError }: VideoPlayerProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const lastSavedRef = useRef(0);
@@ -205,4 +206,11 @@ export function VideoPlayer({ source, poster, title, active = true, autoPlay = f
     </div>}
     {countdown !== null && <div className="autoplay-countdown"><div className="eyebrow">UP NEXT</div><b>{nextEpisodeLabel}</b><strong>{countdown}</strong><button onClick={() => setCountdown(null)}>Cancel</button></div>}
   </div>;
+}
+
+export function VideoPlayer(props: VideoPlayerProps) {
+  if (props.source.type === 'embed' && props.source.provider === 'youtube-embed') {
+    return <YouTubeEmbedPlayer {...props}/>;
+  }
+  return <StandardVideoPlayer {...props}/>;
 }

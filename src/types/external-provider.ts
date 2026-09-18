@@ -16,7 +16,7 @@ export interface ExternalProviderCapabilities {
 
 export interface ExternalAssetReference {
   url: string;
-  usage: 'external-authorized' | 'importable' | 'owned';
+  usage: 'external-authorized' | 'external-reference' | 'importable' | 'owned';
   attribution?: string;
 }
 

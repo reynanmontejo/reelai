@@ -129,3 +129,59 @@ stores dataset attribution alongside imported asset metadata. Enable it with:
 ```text
 REELAI_EXTERNAL_PROVIDERS=huggingface-deepaction
 ```
+
+## YouTube AI embed POC
+
+`youtube-embed` is an opt-in collection of three manually curated,
+creator-published AI filmmaking videos. It uses YouTube's public oEmbed endpoint
+for titles, attribution, and thumbnails and the official privacy-enhanced iframe
+player for playback. It does not search, scrape, download, proxy, or re-host
+YouTube media, and it does not require a YouTube API key.
+
+The player bridge maps the official iframe API's play, pause, seek, current-time,
+completion, and error events into ReelAI's existing progress, resume, autoplay,
+and feed behavior. Browser autoplay rules still apply, so feed playback begins
+muted. Picture-in-picture is intentionally marked unsupported.
+
+Enable the adapter explicitly with:
+
+```text
+REELAI_EXTERNAL_PROVIDERS=youtube-embed
+```
+
+Preview its catalog before publication:
+
+```text
+npm run provider:import -- youtube-embed youtube:curated-ai-shorts-poc --dry-run
+```
+
+YouTube availability and embed permission can change at any time. Review every
+curated record and its creator provenance before publishing it to a production
+catalog; an enabled iframe is not a transfer of content ownership.
+
+## Apify NetShort metadata POC
+
+`apify-netshort-metadata` runs the configured Short Drama API Actor through
+Apify's official server API. It imports only normalized series and episode
+metadata. The adapter intentionally discards upstream playback fields, creates
+no stream-source definitions, does not classify titles as AI-generated, and
+never exposes the Apify token to browser code.
+
+Configure a narrowly scoped server token and opt in explicitly:
+
+```text
+APIFY_API_TOKEN=<server-only scoped token>
+APIFY_SHORT_DRAMA_ACTOR_ID=q4Bs4iFsMJwTOV2jH
+REELAI_EXTERNAL_PROVIDERS=apify-netshort-metadata
+```
+
+Preview a verified NetShort ID before any database write:
+
+```text
+npm run provider:import -- apify-netshort-metadata 2096855749602361346 --dry-run
+```
+
+Actor executions consume Apify usage credit. Catalog imports make one cached
+detail request and one cached episode request. Remote artwork remains an
+external metadata reference, and publication requires a separate rights and
+provenance review.

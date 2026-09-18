@@ -89,12 +89,18 @@ The database includes public catalog access and row-level security for private u
 External integrations are server-only and opt-in:
 
 ```env
-REELAI_EXTERNAL_PROVIDERS=wikimedia-commons-ai,huggingface-deepaction
+REELAI_EXTERNAL_PROVIDERS=wikimedia-commons-ai,huggingface-deepaction,youtube-embed
 ```
 
 Included adapters demonstrate the provider architecture with curated public-domain or licensed media. The experimental DramaFren adapter remains disabled by default and is not recommended for production playback until its end-to-end embed behavior is verified. When explicitly enabled, ReelAI adds only its exact approved frame host to the application CSP.
 
 Never place service-role keys, provider credentials, or private API secrets in `NEXT_PUBLIC_*` variables. See [Adding an authorized provider](docs/ADDING_PROVIDER.md) for the integration and security requirements.
+
+The optional `apify-netshort-metadata` adapter can import normalized NetShort
+series and episode metadata through a server-only Apify token. It deliberately
+creates no playback sources and does not treat the catalog as verified AI
+content. Actor calls consume Apify usage credit; see the provider guide before
+enabling it.
 
 ## Provider imports
 
@@ -108,6 +114,12 @@ Publish an approved import:
 
 ```bash
 npm run provider:import -- <provider-id> <external-series-id> --publish
+```
+
+Preview the curated YouTube AI embed POC without writing to the database:
+
+```bash
+npm run provider:import -- youtube-embed youtube:curated-ai-shorts-poc --dry-run
 ```
 
 ## Verification

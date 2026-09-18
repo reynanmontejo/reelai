@@ -1,0 +1,22 @@
+[
+  {
+    "ok": true,
+    "data": {
+      "resource": "netshort",
+      "endpoint": "detail/:id",
+      "items": [
+        {
+          "id": "2096855749602361346",
+          "title": "The Devil I called Father",
+          "image": "https://awscover.netshort.com/example/poster.webp",
+          "extra": {
+            "description": "A sanitized fixture description.",
+            "episodeCount": 3,
+            "tags": ["Family Bonds", "Plot Twist"]
+          }
+        }
+      ],
+      "total": 1
+    }
+  }
+]

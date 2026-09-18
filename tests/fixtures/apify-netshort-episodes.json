@@ -1,0 +1,40 @@
+[
+  {
+    "ok": true,
+    "data": {
+      "resource": "netshort",
+      "endpoint": "episodes/:id",
+      "items": [
+        {
+          "id": "2097979331079192578",
+          "title": "Episode 3",
+          "image": "https://awscover.netshort.com/example/episode-3.webp",
+          "episodeNumber": 3,
+          "extra": { "isLocked": true, "isVip": false }
+        },
+        {
+          "id": "2097979331045642241",
+          "title": "Episode 1",
+          "image": "https://awscover.netshort.com/example/episode-1.webp",
+          "episodeNumber": 1,
+          "sources": [
+            {
+              "type": "mp4",
+              "url": "https://media.example.invalid/temporary-signed-source.mp4",
+              "referer": "https://www.netshort.com/"
+            }
+          ],
+          "extra": { "isLocked": false, "isVip": false }
+        },
+        {
+          "id": "2097979331070808065",
+          "title": "Episode 2",
+          "image": "https://static.netshort.com/example/episode-2.webp",
+          "episodeNumber": 2,
+          "extra": { "isLocked": false, "isVip": false }
+        }
+      ],
+      "total": 3
+    }
+  }
+]

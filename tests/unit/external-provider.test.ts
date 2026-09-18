@@ -27,6 +27,8 @@ describe('external provider registry and demo adapter', () => {
   it('requires explicit registration and rejects unknown providers', () => {
     const registry = createExternalProviderRegistry([]);
     expect(() => registry.get('reelai-demo')).toThrowError(ApplicationError);
+    expect(createExternalProviderRegistry(['youtube-embed']).get('youtube-embed').id).toBe('youtube-embed');
+    expect(createExternalProviderRegistry(['apify-netshort-metadata']).get('apify-netshort-metadata').id).toBe('apify-netshort-metadata');
     expect(() => createExternalProviderRegistry(['unknown'])).toThrowError(/Unknown configured external provider/);
   });
 

@@ -2,16 +2,20 @@ import 'server-only';
 
 import { ApplicationError } from '@/lib/application-error';
 import type { ExternalProviderAdapter } from '@/types/external-provider';
+import { ApifyNetShortMetadataAdapter } from './apify-netshort.provider';
 import { DemoExternalProviderAdapter } from './demo.provider';
 import { DramaFrenAuthorizedAdapter } from './dramafren.provider';
 import { HuggingFaceDeepActionAdapter } from './huggingface-deepaction.provider';
 import { WikimediaCommonsAiAdapter } from './wikimedia-commons.provider';
+import { YouTubeEmbedAdapter } from './youtube-embed.provider';
 
 const factories: Record<string, () => ExternalProviderAdapter> = {
+  'apify-netshort-metadata': () => new ApifyNetShortMetadataAdapter(),
   'reelai-demo': () => new DemoExternalProviderAdapter(),
   'dramafren-authorized': () => new DramaFrenAuthorizedAdapter(),
   'huggingface-deepaction': () => new HuggingFaceDeepActionAdapter(),
   'wikimedia-commons-ai': () => new WikimediaCommonsAiAdapter(),
+  'youtube-embed': () => new YouTubeEmbedAdapter(),
 };
 
 export class ExternalProviderRegistry {
