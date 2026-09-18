@@ -92,7 +92,7 @@ External integrations are server-only and opt-in:
 REELAI_EXTERNAL_PROVIDERS=wikimedia-commons-ai,huggingface-deepaction
 ```
 
-Included adapters demonstrate the provider architecture with curated public-domain or licensed media. The experimental DramaFren adapter is not recommended for playback: its tested upstream player works directly but is blocked when framed by ReelAI.
+Included adapters demonstrate the provider architecture with curated public-domain or licensed media. The experimental DramaFren adapter remains disabled by default and is not recommended for production playback until its end-to-end embed behavior is verified. When explicitly enabled, ReelAI adds only its exact approved frame host to the application CSP.
 
 Never place service-role keys, provider credentials, or private API secrets in `NEXT_PUBLIC_*` variables. See [Adding an authorized provider](docs/ADDING_PROVIDER.md) for the integration and security requirements.
 

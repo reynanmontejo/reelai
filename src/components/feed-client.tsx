@@ -7,8 +7,8 @@ import { episodeService, recommendationService, seriesService } from '@/lib/appl
 import type { Episode } from '@/types/episode';
 import type { Series } from '@/types/series';
 import { LikeButton, SaveButton } from './library-actions';
+import { ShareButton } from './share-button';
 import { VideoPlayer } from './video-player';
-import { Icon } from './icons';
 
 export type FeedItem = { series: Series; episode: Episode };
 
@@ -61,7 +61,22 @@ export function FeedClient({ initialItems }: { initialItems: FeedItem[] }) {
 
   return <main className="feed" aria-label="Vertical reel feed">{items.map((item, index) => {
     const near = Math.abs(index - activeIndex) <= 1;
-    const recordProgress = (position: number, duration: number) => { progressRef.current[item.episode.id] = { position, duration }; if (position > 0) saveProgress({ episodeId: item.episode.id, seriesId: item.series.id, positionSeconds: position, durationSeconds: duration }); };
-    return <section className="reel" data-reel-index={index} key={`${item.episode.id}:${index}`}><div className="feed-video">{near ? <ReelMedia item={item} active={index === activeIndex} onProgress={recordProgress}/> : <div className="reel-placeholder" style={{ backgroundImage: `url(${item.series.posterUrl})` }}/>}<div className="player-caption"><div className="eyebrow">EPISODE {item.episode.episodeNumber}</div><h3>{item.series.title}</h3><small>{item.episode.title} · {item.series.genres[0]}</small></div><div className="rail"><div><LikeButton compact className="rail-button" episodeId={item.episode.id}/><span>Like</span></div><div><button className="rail-button" aria-label="Comments unavailable">◌</button><span>Later</span></div><div><SaveButton compact className="rail-button" seriesId={item.series.id}/><span>Save</span></div><div><button className="rail-button" aria-label="Share"><Icon name="share"/></button><span>Share</span></div></div>{index === 0 && <div className="swipe-hint">Swipe or scroll for the next reel ↓</div>}</div></section>;
+    const recordProgress = (position: number, duration: number) => {
+      progressRef.current[item.episode.id] = { position, duration };
+      if (position > 0) saveProgress({ episodeId: item.episode.id, seriesId: item.series.id, positionSeconds: position, durationSeconds: duration });
+    };
+    return <section className="reel" data-reel-index={index} key={`${item.episode.id}:${index}`}><div className="feed-video">
+      <>{near
+        ? <ReelMedia item={item} active={index === activeIndex} onProgress={recordProgress}/>
+        : <div className="reel-placeholder" style={{ backgroundImage: `url(${item.series.posterUrl})` }}/>}</>
+      <div className="player-caption"><div className="eyebrow">EPISODE {item.episode.episodeNumber}</div><h3>{item.series.title}</h3><small>{item.episode.title} · {item.series.genres[0]}</small></div>
+      <div className="rail">
+        <div><LikeButton compact className="rail-button" episodeId={item.episode.id}/><span>Like</span></div>
+        <div><button className="rail-button" aria-label="Comments coming soon" disabled>◌</button><span>Soon</span></div>
+        <div><SaveButton compact className="rail-button" seriesId={item.series.id}/><span>Save</span></div>
+        <div><ShareButton compact className="rail-button" title={`${item.series.title} episode ${item.episode.episodeNumber}`} urlPath={`/watch/${item.series.slug}/${item.episode.episodeNumber}`}/><span>Share</span></div>
+      </div>
+      {index === 0 && <div className="swipe-hint">Swipe or scroll for the next reel ↓</div>}
+    </div></section>;
   })}</main>;
 }

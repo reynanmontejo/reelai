@@ -35,8 +35,9 @@ export function VideoPlayer({ source, poster, title, active = true, autoPlay = f
   const onPlaybackErrorRef = useRef(onPlaybackError);
   const failureReportedRef = useRef(false);
   const resumePositionRef = useRef(resumePosition);
+  const embedTimeoutRef = useRef<number | null>(null);
   const [playing, setPlaying] = useState(false);
-  const [loading, setLoading] = useState(source.type !== 'embed');
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [position, setPosition] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -109,6 +110,29 @@ export function VideoPlayer({ source, poster, title, active = true, autoPlay = f
   useEffect(() => { setPipSupported(Boolean(document.pictureInPictureEnabled)); }, []);
 
   useEffect(() => {
+    if (source.type !== 'embed') return;
+    setError('');
+    setLoading(true);
+    failureReportedRef.current = false;
+    const sourceHost = new URL(source.url).hostname;
+    embedTimeoutRef.current = window.setTimeout(() => reportTerminalError('The embedded player did not become available.'), 12_000);
+    const onPolicyViolation = (event: SecurityPolicyViolationEvent) => {
+      if (!['frame-src', 'child-src'].includes(event.effectiveDirective)) return;
+      try {
+        if (new URL(event.blockedURI).hostname === sourceHost) reportTerminalError('This embedded player is blocked by the application security policy.');
+      } catch {
+        // Ignore unrelated or non-URL policy violations.
+      }
+    };
+    window.addEventListener('securitypolicyviolation', onPolicyViolation);
+    return () => {
+      if (embedTimeoutRef.current !== null) window.clearTimeout(embedTimeoutRef.current);
+      embedTimeoutRef.current = null;
+      window.removeEventListener('securitypolicyviolation', onPolicyViolation);
+    };
+  }, [reportTerminalError, retryKey, source.type, source.url]);
+
+  useEffect(() => {
     const video = videoRef.current;
     if (!video || source.type === 'embed') return;
     if (active && autoPlay) void video.play().catch(() => undefined);
@@ -162,7 +186,7 @@ export function VideoPlayer({ source, poster, title, active = true, autoPlay = f
   };
 
   if (source.type === 'embed') {
-    return <div className={`universal-player ${compact ? 'compact-player' : ''}`} ref={hostRef}><iframe key={retryKey} src={source.url} title={title} allow="autoplay; fullscreen; picture-in-picture" allowFullScreen onLoad={() => setLoading(false)} onError={() => reportTerminalError('This authorized embed could not be loaded.')}/>{loading && !error && <div className="player-status"><span className="spinner"/>Loading embed…</div>}{error && <div className="player-error"><b>Unable to load this embed</b><span>{error}</span><button className="secondary" onClick={() => { failureReportedRef.current = false; setError(''); setLoading(true); setRetryKey((value) => value + 1); }}>Try again</button></div>}<div className="embed-note">Playback controls are provided by {source.provider}.</div></div>;
+    return <div className={`universal-player ${compact ? 'compact-player' : ''}`} ref={hostRef}><iframe key={retryKey} src={source.url} title={title} allow="autoplay; fullscreen; picture-in-picture" allowFullScreen onLoad={() => { if (embedTimeoutRef.current !== null) window.clearTimeout(embedTimeoutRef.current); embedTimeoutRef.current = null; setLoading(false); }} onError={() => reportTerminalError('This authorized embed could not be loaded.')}/>{loading && !error && <div className="player-status"><span className="spinner"/>Loading embed…</div>}{error && <div className="player-error"><b>Unable to load this embed</b><span>{error}</span><div className="actions"><button className="secondary" onClick={() => { failureReportedRef.current = false; setError(''); setLoading(true); setRetryKey((value) => value + 1); }}>Try again</button><a className="secondary" href={source.url} target="_blank" rel="noreferrer">Open provider</a></div></div>}<div className="embed-note">Playback controls by {source.provider}. <a href={source.url} target="_blank" rel="noreferrer">Open provider</a></div></div>;
   }
 
   return <div className={`universal-player ${compact ? 'compact-player' : ''}`} ref={hostRef}>

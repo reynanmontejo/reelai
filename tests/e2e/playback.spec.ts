@@ -92,6 +92,44 @@ test('autoplay countdown navigates to the next episode after playback ends', asy
   await expect(page).toHaveURL(/\/watch\/the-ceos-second-chance\/2$/, { timeout: 6_000 });
 });
 
+test('a completed episode replays from the beginning instead of showing a stale resume position', async ({ page }) => {
+  await page.evaluate(() => localStorage.setItem('reelai.local-state.v1', JSON.stringify({
+    schemaVersion: 3,
+    favorites: [],
+    likes: [],
+    preferences: { autoplay: true },
+    history: {
+      '20000000-0000-4000-8000-000000000101': {
+        episodeId: '20000000-0000-4000-8000-000000000101',
+        seriesId: '10000000-0000-4000-8000-000000000001',
+        positionSeconds: 124,
+        durationSeconds: 124,
+        completed: true,
+        updatedAt: new Date().toISOString(),
+      },
+    },
+  })));
+  await page.goto('/watch/the-ceos-second-chance/1');
+  await expect(page.getByText('Previously completed · Replay from the beginning')).toBeVisible();
+  await expect(page.getByText(/Resuming from/)).toHaveCount(0);
+  const video = page.locator('video');
+  await expect.poll(() => video.evaluate((element) => (element as HTMLVideoElement).currentTime)).toBeLessThan(2);
+});
+
+test('series sharing uses the browser share capability with the current URL', async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'share', {
+      configurable: true,
+      value: async (data: ShareData) => sessionStorage.setItem('reelai:last-share', JSON.stringify(data)),
+    });
+  });
+  await page.goto('/series/the-ceos-second-chance');
+  await page.getByRole('button', { name: "Share The CEO's Second Chance" }).click();
+  const shared = await page.evaluate(() => JSON.parse(sessionStorage.getItem('reelai:last-share') || '{}') as ShareData);
+  expect(shared.title).toBe("The CEO's Second Chance");
+  expect(shared.url).toBe('http://localhost:3107/series/the-ceos-second-chance');
+});
+
 test('a terminal playback error hands off to the next normalized candidate', async ({ page }) => {
   test.skip(process.env.NEXT_PUBLIC_REELAI_CONTENT_BACKEND !== 'supabase', 'Resolver candidate test runs in explicit Supabase mode.');
   await page.route('**/api/stream/**', async (route) => {

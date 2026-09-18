@@ -12,9 +12,9 @@ export default defineConfig({
     ...devices['Desktop Chrome'],
   },
   webServer: {
-    command: 'npm run dev -- --port 3107',
+    command: 'npm run build && npm run start -- --port 3107',
     url: 'http://localhost:3107',
-    reuseExistingServer: true,
+    reuseExistingServer: !process.env.CI,
     timeout: 120_000,
     env: {
       NEXT_PUBLIC_REELAI_CONTENT_BACKEND: process.env.NEXT_PUBLIC_REELAI_CONTENT_BACKEND || 'mock',

@@ -1,1 +1,11 @@
-import Link from 'next/link';export default function Login(){return <main className="auth"><form className="auth-card"><div className="logo">REEL<i>AI</i></div><h1>Welcome back</h1><p className="muted">Your next episode is waiting.</p><div className="field"><label>Email</label><input type="email" placeholder="you@example.com"/></div><div className="field"><label>Password</label><input type="password" placeholder="••••••••"/></div><button className="primary">Sign in</button><p className="muted" style={{textAlign:'center'}}>New here? <Link href="/signup" style={{color:'#ff78a7'}}>Create an account</Link></p></form></main>}
+import Link from 'next/link';
+
+export default function Login() {
+  return <main className="auth"><section className="auth-card">
+    <div className="logo">REEL<i>AI</i></div>
+    <h1>Guest access is ready</h1>
+    <p className="muted">Accounts are optional and are not enabled in this prototype. Your list, likes, history, and playback progress stay on this device.</p>
+    <Link className="primary" href="/">Continue as guest</Link>
+    <p className="muted" style={{ textAlign: 'center' }}>Account sync will be introduced in a later phase.</p>
+  </section></main>;
+}

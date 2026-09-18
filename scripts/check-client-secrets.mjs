@@ -18,6 +18,9 @@ async function filesBelow(directory) {
 }
 
 const files = await filesBelow(browserOutput);
+if (!files.length) {
+  throw new Error('Client secret exposure check could not run because no browser build files were found. Run npm run build first.');
+}
 const texts = await Promise.all(files
   .filter((file) => ['.js', '.json', '.map', '.css'].includes(extname(file)))
   .map((file) => readFile(file, 'utf8')));

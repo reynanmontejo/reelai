@@ -1,1 +1,11 @@
-import Link from 'next/link';export default function Signup(){return <main className="auth"><form className="auth-card"><div className="logo">REEL<i>AI</i></div><h1>Start watching</h1><p className="muted">Create your free ReelAI account.</p><div className="field"><label>Name</label><input placeholder="Your name"/></div><div className="field"><label>Email</label><input type="email" placeholder="you@example.com"/></div><div className="field"><label>Password</label><input type="password" placeholder="8+ characters"/></div><button className="primary">Create account</button><p className="muted" style={{textAlign:'center'}}>Already a member? <Link href="/login" style={{color:'#ff78a7'}}>Sign in</Link></p></form></main>}
+import Link from 'next/link';
+
+export default function Signup() {
+  return <main className="auth"><section className="auth-card">
+    <div className="logo">REEL<i>AI</i></div>
+    <h1>No account required</h1>
+    <p className="muted">ReelAI currently provides immediate guest access. Optional accounts and cross-device synchronization are planned but not active.</p>
+    <Link className="primary" href="/">Start watching</Link>
+    <p className="muted" style={{ textAlign: 'center' }}>Your guest preferences and progress are stored locally.</p>
+  </section></main>;
+}

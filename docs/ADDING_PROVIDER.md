@@ -50,6 +50,7 @@ The application continues to use internal ReelAI UUIDs. Provider identifiers liv
 10. Register the adapter explicitly and enable it with `REELAI_EXTERNAL_PROVIDERS` only in environments where it is authorized.
 11. Add unit tests using mocked upstream responses. Tests must not call a live third-party provider.
 12. Run a dry import before publication and verify attribution, imagery, stream purpose, and territory restrictions.
+13. Add each approved iframe origin to the application CSP through the provider-specific security policy and verify the complete framed experience in a production build.
 
 ## Import behavior
 
