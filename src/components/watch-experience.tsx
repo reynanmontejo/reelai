@@ -18,7 +18,7 @@ export function WatchExperience({ show, episode, upcoming }: { show: Series; epi
   const router = useRouter();
   const { autoplay } = useAutoplay();
   const { history, saveProgress, loading: historyLoading } = useWatchHistory();
-  const { source, loading: sourceLoading, error: sourceError, reportPlaybackFailure } = useStreamSource(episode.id);
+  const { source, loading: sourceLoading, error: sourceError, reportPlaybackFailure, retry } = useStreamSource(episode.id);
   const savedProgress = history[episode.id];
   const resume = historyLoading || savedProgress?.completed ? 0 : savedProgress?.positionSeconds || 0;
   const save = useCallback((positionSeconds: number, durationSeconds: number) => saveProgress({ episodeId: episode.id, seriesId: show.id, positionSeconds, durationSeconds }), [episode.id, saveProgress, show.id]);
@@ -29,7 +29,7 @@ export function WatchExperience({ show, episode, upcoming }: { show: Series; epi
     <div className="watch-player-shell">{sourceLoading
       ? <div className="universal-player player-status"><span className="spinner"/>Resolving stream…</div>
       : sourceError || !source
-        ? <div className="universal-player player-error"><b>Unable to resolve this episode</b><span>{sourceError || 'No active source is available.'}</span></div>
+        ? <div className="universal-player player-error"><b>Unable to resolve this episode</b><span>{sourceError || 'No active source is available.'}</span><button className="secondary" onClick={retry}>Try again</button></div>
         : <><VideoPlayer source={source} poster={episode.thumbnailUrl || show.posterUrl} title={`${show.title} — Episode ${episode.episodeNumber}`} resumePosition={resume} autoplayNext={autoplay} nextEpisodeLabel={next ? `Episode ${next.episodeNumber}: ${next.title}` : undefined} onProgress={save} onPause={save} onEnded={save} onNextEpisode={goNext} onPlaybackError={(_error, position, mediaDuration) => { if (position > 0) save(position, mediaDuration); reportPlaybackFailure(); }}/><div className="source-label">{source.type.toUpperCase()} · {source.provider}</div></>}
     </div>
     <section className="queue">

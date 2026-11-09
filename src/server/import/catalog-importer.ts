@@ -39,7 +39,7 @@ function validateEpisodes(episodes: ExternalEpisode[]) {
 }
 
 export class CatalogImporter {
-  constructor(private readonly registry: ExternalProviderRegistry = getExternalProviderRegistry()) {}
+  constructor(private readonly registry: Pick<ExternalProviderRegistry, 'get'> = getExternalProviderRegistry()) {}
 
   async prepare(providerId: string, externalSeriesId: string): Promise<ExternalCatalogImport> {
     const adapter = this.registry.get(providerId);

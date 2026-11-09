@@ -102,7 +102,28 @@ creates no playback sources and does not treat the catalog as verified AI
 content. Actor calls consume Apify usage credit; see the provider guide before
 enabling it.
 
+The optional `dramabos-metadata` adapter uses DramaBos's documented bearer-key
+API to normalize search, series, and episode metadata from providers that use
+its standard API route shape. It is server-only and deliberately creates no
+playback sources: DramaBos states that third-party content belongs to its
+respective copyright owners, so playback stays disabled until rights for a
+specific catalog are independently verified.
+
 ## Provider imports
+
+See [Free API setup](docs/FREE_API_SETUP.md) for APIShort and DramaBos key
+instructions, current free-plan limitations, and PowerShell fetch examples.
+`apishort-metadata` supports the verified ShortMax popular catalog with cached
+search, series detail, episode imports, and dynamic HLS playback. The provider
+ID retains its original name for compatibility. Signed rendition URLs are
+resolved server-side and never stored in the catalog database.
+
+List selectable external IDs before importing:
+
+```bash
+npm run provider:catalog -- apishort-metadata family
+npm run provider:catalog -- dramabos-metadata love
+```
 
 Preview an import before writing to Supabase:
 

@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { ApplicationError } from '@/lib/application-error';
+import { ApplicationError, type ApplicationErrorCode } from '@/lib/application-error';
 import { getExternalProviderRegistry, type ExternalProviderRegistry } from '@/server/providers/external/registry';
 import { executeProviderResolution } from '@/server/providers/external/execution';
 import { assertProviderHealthy, recordProviderFailure, recordProviderSuccess } from '@/server/providers/health';
@@ -39,9 +39,18 @@ function errorCode(error: unknown) {
   return error instanceof ApplicationError ? error.code : 'PROVIDER_UNAVAILABLE';
 }
 
+const playbackFailureMessages: Partial<Record<ApplicationErrorCode, string>> = {
+  PROVIDER_RATE_LIMITED: 'The video provider’s request limit has been reached. Please try again after it resets.',
+  PROVIDER_TIMEOUT: 'The video provider took too long to respond. Please try again.',
+  SOURCE_FORBIDDEN: 'The video provider rejected the playback request.',
+  SOURCE_EXPIRED: 'The provider returned expired playback links. Please try again.',
+  PROVIDER_UNAVAILABLE: 'The video provider is temporarily unavailable. Please try again.',
+  MALFORMED_PROVIDER_RESPONSE: 'The video provider returned invalid playback data. Please try again.',
+};
+
 export class ServerStreamResolver {
   constructor(
-    private readonly registry: ExternalProviderRegistry = getExternalProviderRegistry(),
+    private readonly registry: Pick<ExternalProviderRegistry, 'get' | 'has'> = getExternalProviderRegistry(),
     private readonly timeoutMs = 8_000,
   ) {}
 
@@ -78,6 +87,7 @@ export class ServerStreamResolver {
       capabilities: source.capabilities,
     }));
     const externalIds = new Map((referenceResult.data as Array<{ provider: string; external_id: string }>).map((row) => [row.provider, row.external_id]));
+    const failures: ApplicationErrorCode[] = [];
 
     for (const definition of definitionResult.data as SourceDefinitionRow[]) {
       if (definition.resolution_mode === 'static') {
@@ -98,8 +108,10 @@ export class ServerStreamResolver {
       const adapter = this.registry.get(definition.provider_id);
       const externalEpisodeId = externalIds.get(definition.provider_id);
       if (!externalEpisodeId) continue;
+      let attemptedResolution = false;
       try {
         assertProviderHealthy(adapter.id);
+        attemptedResolution = true;
         const resolved = await executeProviderResolution(adapter, {
           externalEpisodeId,
           externalSourceReference: definition.external_reference,
@@ -117,14 +129,21 @@ export class ServerStreamResolver {
         }
         await recordProviderSuccess(adapter.id);
       } catch (error) {
-        await recordProviderFailure(adapter.id, errorCode(error));
+        const code = errorCode(error);
+        failures.push(code);
+        // Requests during a cooldown must not extend the cooldown indefinitely.
+        if (attemptedResolution) await recordProviderFailure(adapter.id, code);
       }
     }
 
     const unique = [...new Map(candidates
       .sort((a, b) => a.priority - b.priority)
       .map((candidate) => [`${candidate.sourceDefinitionId}:${candidate.url}`, candidate])).values()];
-    if (!unique.length) throw new ApplicationError('ALL_SOURCES_FAILED', 'No playable source is currently available.');
+    if (!unique.length) {
+      const code = failures.includes('PROVIDER_RATE_LIMITED') ? 'PROVIDER_RATE_LIMITED' : failures.find(failure => playbackFailureMessages[failure]);
+      if (code) throw new ApplicationError(code, playbackFailureMessages[code]!);
+      throw new ApplicationError('ALL_SOURCES_FAILED', 'No playable source is currently available.');
+    }
     return unique;
   }
 }

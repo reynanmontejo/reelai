@@ -13,9 +13,9 @@ import { VideoPlayer } from './video-player';
 export type FeedItem = { series: Series; episode: Episode };
 
 function ReelMedia({ item, active, onProgress }: { item: FeedItem; active: boolean; onProgress: (position: number, duration: number) => void }) {
-  const { source, loading, error, reportPlaybackFailure } = useStreamSource(item.episode.id, 'feed');
+  const { source, loading, error, reportPlaybackFailure, retry } = useStreamSource(item.episode.id, 'feed');
   if (loading) return <div className="universal-player player-status"><span className="spinner"/>Loading reel…</div>;
-  if (error || !source) return <div className="universal-player player-error"><b>Unable to load this reel</b><span>{error || 'No active source is available.'}</span></div>;
+  if (error || !source) return <div className="universal-player player-error"><b>Unable to load this reel</b><span>{error || 'No active source is available.'}</span><button className="secondary" onClick={retry}>Try again</button></div>;
   return <VideoPlayer compact source={source} poster={item.episode.thumbnailUrl || item.series.posterUrl} title={`${item.series.title} episode ${item.episode.episodeNumber}`} active={active} autoPlay muted onProgress={onProgress} onPause={onProgress} onPlaybackError={(_error, position, duration) => { if (position > 0) onProgress(position, duration); reportPlaybackFailure(); }}/>;
 }
 

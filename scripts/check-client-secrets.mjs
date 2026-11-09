@@ -9,6 +9,8 @@ const protectedNames = [
   'PROVIDER_AUTHORIZATION_TOKEN',
   'IMPORT_WEBHOOK_SECRET',
   'APIFY_API_TOKEN',
+  'DRAMABOS_API_KEY',
+  'APISHORT_API_KEY',
 ];
 
 async function filesBelow(directory) {

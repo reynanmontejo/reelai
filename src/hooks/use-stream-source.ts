@@ -26,6 +26,8 @@ export function useStreamSource(episodeId: string, purpose: Purpose = 'watch') {
   const [sourceIndex, setSourceIndex] = useState(0);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+  const [reloadKey, setReloadKey] = useState(0);
+  const retry = useCallback(() => setReloadKey(current => current + 1), []);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -59,7 +61,7 @@ export function useStreamSource(episodeId: string, purpose: Purpose = 'watch') {
       .finally(() => { if (active) setLoading(false); });
 
     return () => { active = false; controller.abort(); };
-  }, [episodeId, purpose]);
+  }, [episodeId, purpose, reloadKey]);
 
   const reportPlaybackFailure = useCallback(() => {
     setSourceIndex((current) => {
@@ -76,5 +78,6 @@ export function useStreamSource(episodeId: string, purpose: Purpose = 'watch') {
     reportPlaybackFailure,
     error,
     loading,
+    retry,
   };
 }

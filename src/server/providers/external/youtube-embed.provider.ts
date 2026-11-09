@@ -130,18 +130,18 @@ export class YouTubeEmbedAdapter implements ExternalProviderAdapter {
       externalId: YOUTUBE_AI_COLLECTION_ID,
       slug: 'youtube-ai-short-film-showcase',
       title: 'AI Short Film Showcase',
-      alternativeTitle: 'Curated YouTube AI Film POC',
-      description: 'A small experimental collection of creator-published AI filmmaking videos played through YouTube’s official embedded player.',
+      alternativeTitle: 'Curated AI Films',
+      description: 'Discover AI-assisted short films and filmmaking showcases from independent creators.',
       poster: {
         url: videos[0].thumbnailUrl,
         usage: 'external-authorized',
         attribution: `${videos[0].title} — ${videos[0].authorName} — YouTube thumbnail.`,
       },
-      status: 'Experimental embed collection',
+      status: 'AI-assisted film collection',
       genres: ['AI', 'Experimental'],
       tags: ['AI-generated', 'AI-assisted', 'Short film', 'YouTube embed'],
       isAiOriginal: true,
-      badge: 'YOUTUBE AI POC',
+      badge: 'AI FILM SHOWCASE',
     };
   }
 }

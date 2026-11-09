@@ -116,6 +116,20 @@ test('a completed episode replays from the beginning instead of showing a stale 
   await expect.poll(() => video.evaluate((element) => (element as HTMLVideoElement).currentTime)).toBeLessThan(2);
 });
 
+test('the watch page can retry a failed source without reloading the page', async ({ page }) => {
+  let blockMedia = true;
+  await page.route('**/videos/**', route => blockMedia ? route.abort() : route.continue());
+  await page.goto('/watch/the-ceos-second-chance/1');
+  const retry = page.getByRole('button', { name: 'Try again', exact: true });
+  await expect(retry).toBeVisible();
+  blockMedia = false;
+  await retry.click();
+  await expect(page.locator('video')).toHaveCount(1);
+  await expect.poll(() => page.locator('video').evaluate(element => (element as HTMLVideoElement).readyState)).toBeGreaterThanOrEqual(1);
+  await expect(retry).toHaveCount(0);
+  await expect(page).toHaveURL(/\/watch\/the-ceos-second-chance\/1$/);
+});
+
 test('series sharing uses the browser share capability with the current URL', async ({ page }) => {
   await page.addInitScript(() => {
     Object.defineProperty(navigator, 'share', {

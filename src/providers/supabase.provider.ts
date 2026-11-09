@@ -88,9 +88,14 @@ export class SupabaseContentProvider implements ContentProvider {
     return result.data ? mapSeries(result.data as DatabaseSeriesRow) : null;
   }
   async getFeaturedSeries() {
-    const result = await getSupabaseClient().from('series').select(SERIES_COLUMNS).gt('trending_rank', 0).order('trending_rank').order('created_at', { ascending: false }).limit(1).maybeSingle();
+    const result = await getSupabaseClient().from('series').select(SERIES_COLUMNS).eq('is_published', true).gt('trending_rank', 0).order('trending_rank').order('created_at', { ascending: false }).order('id').limit(1).maybeSingle();
     if (result.error) throw catalogUnavailable('getFeaturedSeries', result.error);
-    return result.data ? mapSeries(result.data as DatabaseSeriesRow) : null;
+    if (result.data) return mapSeries(result.data as DatabaseSeriesRow);
+
+    // New imports have no editorial rank. They still belong on a nonempty Home.
+    const fallback = await getSupabaseClient().from('series').select(SERIES_COLUMNS).eq('is_published', true).order('created_at', { ascending: false }).order('id').limit(1).maybeSingle();
+    if (fallback.error) throw catalogUnavailable('getFeaturedSeries', fallback.error);
+    return fallback.data ? mapSeries(fallback.data as DatabaseSeriesRow) : null;
   }
   async getTrending() {
     const result = await getSupabaseClient().from('series').select(SERIES_COLUMNS).order('trending_rank').order('created_at', { ascending: false }).limit(12);

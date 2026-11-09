@@ -1,5 +1,11 @@
 # Adding an authorized external provider
 
+For APIShort and DramaBos free-key setup and current verification limits, see
+[Free API setup](FREE_API_SETUP.md). APIShort's initial adapter supports catalog
+catalog and dynamic HLS playback. Its catalog, detail, episode and playback
+paths were verified using the configured server key. Stable source definitions
+use internal UUIDs and external episode IDs; signed URLs stay out of the database.
+
 ReelAI external adapters are server-only integrations. They do not replace `MockContentProvider` or `SupabaseContentProvider`, and they must never be imported by React Client Components.
 
 ## Required approval and integration information
@@ -61,6 +67,12 @@ npm run provider:import -- <provider-id> <external-series-id> --publish
 ```
 
 Imports default to unpublished. Provider I/O completes before the atomic database RPC starts. A provider/external ID advisory lock serializes concurrent imports. Provider IDs are the matching identity; titles and episode numbers are never used to overwrite unrelated records.
+
+Source retirement is scoped to the series being imported. Keep migration
+`20261109090000_scope_import_source_retirement.sql` applied: earlier versions
+could disable every other series from the same provider. The database regression
+test `import_source_isolation.test.sql` covers two-series isolation, source
+replacement, removed episodes and stable internal IDs.
 
 Provider-supplied title, alternate title, release year, status, episode title/number, duration, and release date are synchronized. Descriptions, artwork, genres, tags, badges, and editorial ranking are set on initial creation and then preserved for future editorial overrides. Missing provider episodes are unpublished and their definitions are disabled rather than deleted.
 
@@ -185,3 +197,34 @@ Actor executions consume Apify usage credit. Catalog imports make one cached
 detail request and one cached episode request. Remote artwork remains an
 external metadata reference, and publication requires a separate rights and
 provenance review.
+
+## DramaBos metadata adapter
+
+`dramabos-metadata` uses DramaBos's documented bearer-key API for catalog
+search, series detail, and episode lists. Provider identity is preserved as
+`provider:series-id`, so DramaBos/provider identifiers never replace ReelAI's
+internal UUIDs. The initial implementation supports providers documented with
+the standard `/{provider}/api/v1` path shape; special route families such as
+FlickReels and iDrama are rejected until separately implemented and tested.
+
+Configure it only with a server-side key:
+
+```text
+DRAMABOS_API_KEY=<server-only API key>
+DRAMABOS_SEARCH_PROVIDER=dramabox
+REELAI_EXTERNAL_PROVIDERS=dramabos-metadata
+```
+
+Preview a known record without writing to Supabase:
+
+```text
+npm run provider:import -- dramabos-metadata dramabox:<series-id> --dry-run
+```
+
+The adapter intentionally imports metadata and external CDN image references
+only. It creates no stream definitions and reports all playback capabilities
+as false. DramaBos's published disclaimer says catalog media belongs to its
+respective third-party copyright owners and places compliance responsibility
+on API users; an API subscription alone is therefore not treated as proof of
+distribution rights. Enable playback only after written catalog and territory
+rights are verified.
