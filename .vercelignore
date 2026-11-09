@@ -1,0 +1,12 @@
+# Deployment configuration is supplied through Vercel environment variables.
+# Never upload local credentials or generated build output.
+.env*
+.git/
+.next/
+.next-stale/
+.vercel/
+node_modules/
+playwright-report/
+test-results/
+*.tsbuildinfo
+npm-debug.log*

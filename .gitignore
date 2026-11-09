@@ -1,6 +1,7 @@
 node_modules/
 .next/
 .next-stale/
+.vercel/
 .env*
 !.env.example
 npm-debug.log*
